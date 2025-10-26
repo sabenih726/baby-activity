@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatatan Aktivitas Bayi</title>
+
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Theme Color for Android -->
+    <meta name="theme-color" content="#667eea">
+
+    <!-- iOS "Add to Home Screen" Icon -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .records {
+            margin-top: 30px;
+        }
+
+        .record-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+
+        .record-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .record-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .record-info p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .record-info strong {
+            color: #333;
+        }
+
+        .btn-delete {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-delete:hover {
+            background: #ff3838;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .summary h2 {
+            margin-bottom: 15px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-item .number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .icon {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .tab-btn {
+                font-size: 0.8em;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Baby Activity Log</h1>
+        <p class="subtitle">Record every important moment of your little one</p>
+
+        <div class="summary" id="summary">
+            <h2>Today's Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="number" id="totalFeeding">0</div>
+                    <div class="label">Kali Minum</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="totalMl">0ml</div>
+                    <div class="label">Total Asupan</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="totalSleep">0</div>
+                    <div class="label">Sesi Tidur</div>
+                </div>
+                <div class="summary-item">
+                    <div class="number" id="totalDiaper">0</div>
+                    <div class="label">Ganti Popok</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('feeding')">🍼 Minum Susu</button>
+            <button class="tab-btn" onclick="switchTab('sleep')">😴 Tidur</button>
+            <button class="tab-btn" onclick="switchTab('diaper')">🩱 Ganti Popok</button>
+            <button class="tab-btn" onclick="switchTab('bath')">🛁 Mandi</button>
+            <button class="tab-btn" onclick="switchTab('notes')">📝 Catatan</button>
+            <button class="tab-btn" onclick="switchTab('charts')">📊 Grafik</button>
+            <button class="tab-btn" onclick="switchTab('records')">📋 Riwayat</button>
+        </div>
+
+        <!-- Feeding Tab -->
+        <div id="feeding" class="tab-content active">
+            <form onsubmit="addFeeding(event)">
+                <div class="form-group">
+                    <label>⏰ Waktu Minum</label>
+                    <input type="datetime-local" id="feedingTime" required>
+                </div>
+                <div class="form-group">
+                    <label>🍼 Jenis Susu</label>
+                    <select id="feedingType" required>
+                        <option value="ASI">ASI</option>
+                        <option value="Formula">Susu Formula</option>
+                        <option value="ASI Perah">ASI Perah</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📏 Jumlah (ml)</label>
+                    <input type="number" id="feedingAmount" placeholder="Contoh: 120" required>
+                </div>
+                <div class="form-group">
+                    <label>💭 Catatan (opsional)</label>
+                    <textarea id="feedingNotes" placeholder="Contoh: Bayi minum dengan lahap"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Simpan Data Minum</button>
+            </form>
+        </div>
+
+        <!-- Sleep Tab -->
+        <div id="sleep" class="tab-content">
+            <form onsubmit="addSleep(event)">
+                <div class="form-group">
+                    <label>😴 Waktu Mulai Tidur</label>
+                    <input type="datetime-local" id="sleepStart" required>
+                </div>
+                <div class="form-group">
+                    <label>⏰ Waktu Bangun</label>
+                    <input type="datetime-local" id="sleepEnd" required>
+                </div>
+                <div class="form-group">
+                    <label>🌙 Kualitas Tidur</label>
+                    <select id="sleepQuality" required>
+                        <option value="Nyenyak">Nyenyak</option>
+                        <option value="Normal">Normal</option>
+                        <option value="Rewel">Rewel/Sering Bangun</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💭 Catatan (opsional)</label>
+                    <textarea id="sleepNotes" placeholder="Contoh: Tidur tanpa terbangun"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Simpan Data Tidur</button>
+            </form>
+        </div>
+
+        <!-- Diaper Tab -->
+        <div id="diaper" class="tab-content">
+            <form onsubmit="addDiaper(event)">
+                <div class="form-group">
+                    <label>⏰ Waktu Ganti Popok</label>
+                    <input type="datetime-local" id="diaperTime" required>
+                </div>
+                <div class="form-group">
+                    <label>🩱 Jenis</label>
+                    <select id="diaperType" required>
+                        <option value="BAK (Pipis)">BAK (Pipis)</option>
+                        <option value="BAB">BAB</option>
+                        <option value="BAK + BAB">BAK + BAB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💩 Kondisi BAB (jika ada)</label>
+                    <select id="poopCondition">
+                        <option value="-">Tidak ada BAB</option>
+                        <option value="Normal">Normal (Kuning/Lembek)</option>
+                        <option value="Cair">Cair/Diare</option>
+                        <option value="Keras">Keras/Sembelit</option>
+                        <option value="Hijau">Berwarna Hijau</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💭 Catatan (opsional)</label>
+                    <textarea id="diaperNotes" placeholder="Contoh: Popok sangat basah"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Simpan Data Popok</button>
+            </form>
+        </div>
+
+        <!-- Bath Tab -->
+        <div id="bath" class="tab-content">
+            <form onsubmit="addBath(event)">
+                <div class="form-group">
+                    <label>⏰ Waktu Mandi</label>
+                    <input type="datetime-local" id="bathTime" required>
+                </div>
+                <div class="form-group">
+                    <label>🛁 Jenis Mandi</label>
+                    <select id="bathType" required>
+                        <option value="Mandi Biasa">Mandi Biasa</option>
+                        <option value="Mandi dengan Shampo">Mandi dengan Shampo</option>
+                        <option value="Seka dengan Lap">Seka dengan Lap</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>😊 Reaksi Bayi</label>
+                    <select id="bathReaction">
+                        <option value="Senang">Senang</option>
+                        <option value="Biasa">Biasa saja</option>
+                        <option value="Menangis">Menangis</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💭 Catatan (opsional)</label>
+                    <textarea id="bathNotes" placeholder="Contoh: Main air dengan senang"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Simpan Data Mandi</button>
+            </form>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes" class="tab-content">
+            <form onsubmit="addNote(event)">
+                <div class="form-group">
+                    <label>⏰ Waktu</label>
+                    <input type="datetime-local" id="noteTime" required>
+                </div>
+                <div class="form-group">
+                    <label>🏷️ Kategori</label>
+                    <select id="noteCategory" required>
+                        <option value="Kesehatan">🏥 Kesehatan</option>
+                        <option value="Perkembangan">📈 Perkembangan</option>
+                        <option value="Obat/Vitamin">💊 Obat/Vitamin</option>
+                        <option value="Suhu Tubuh">🌡️ Suhu Tubuh</option>
+                        <option value="Lainnya">📝 Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📝 Catatan</label>
+                    <textarea id="noteContent" placeholder="Contoh: Bayi tersenyum untuk pertama kali" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Simpan Catatan</button>
+            </form>
+        </div>
+
+        <!-- Records Tab -->
+        <div id="records" class="tab-content">
+            <div class="records" id="recordsList">
+                <div class="empty-state">Belum ada catatan hari ini</div>
+            </div>
+        </div>
+
+        <!-- Charts Tab -->
+        <div id="charts" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #667eea;">📊 Visualisasi Aktivitas Bayi</h2>
+            
+            <div style="margin-bottom: 30px;">
+                <label style="margin-bottom: 10px; display: block; font-weight: 600;">Pilih Periode:</label>
+                <select id="chartPeriod" onchange="updateCharts()" style="width: auto; min-width: 200px;">
+                    <option value="7">7 Hari Terakhir</option>
+                    <option value="14">14 Hari Terakhir</option>
+                    <option value="30">30 Hari Terakhir</option>
+                </select>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #667eea;">🍼 Pola Minum Susu (ml)</h3>
+                <canvas id="feedingChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #667eea;">😴 Pola Tidur (jam)</h3>
+                <canvas id="sleepChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #667eea;">🩱 Frekuensi Ganti Popok</h3>
+                <canvas id="diaperChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hapus 1 dari 2 script Chart.js yang duplikat -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script>
+        // MODIFIKASI 1: Muat data dari localStorage
+        let activities = JSON.parse(localStorage.getItem('babyActivities')) || [];
+        let feedingChart, sleepChart, diaperChart;
+
+        // MODIFIKASI 2: Buat fungsi untuk menyimpan data ke localStorage
+        function saveActivities() {
+            localStorage.setItem('babyActivities', JSON.stringify(activities));
+        }
+
+        function setDefaultTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const timeStr = now.toISOString().slice(0, 16);
+            
+            document.getElementById('feedingTime').value = timeStr;
+            document.getElementById('sleepStart').value = timeStr;
+            document.getElementById('sleepEnd').value = timeStr;
+            document.getElementById('diaperTime').value = timeStr;
+            document.getElementById('bathTime').value = timeStr;
+            document.getElementById('noteTime').value = timeStr;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach((btn, index) => {
+                if (btn.textContent.includes('Minum') && tabName === 'feeding') btn.classList.add('active');
+                if (btn.textContent.includes('Tidur') && tabName === 'sleep') btn.classList.add('active');
+                if (btn.textContent.includes('Popok') && tabName === 'diaper') btn.classList.add('active');
+                if (btn.textContent.includes('Mandi') && tabName === 'bath') btn.classList.add('active');
+                if (btn.textContent.includes('Catatan') && tabName === 'notes') btn.classList.add('active');
+                if (btn.textContent.includes('Grafik') && tabName === 'charts') btn.classList.add('active');
+                if (btn.textContent.includes('Riwayat') && tabName === 'records') btn.classList.add('active');
+            });
+        }
+
+        function addFeeding(e) {
+            e.preventDefault();
+            
+            const activity = {
+                id: Date.now(),
+                type: 'feeding',
+                time: document.getElementById('feedingTime').value,
+                feedingType: document.getElementById('feedingType').value,
+                amount: document.getElementById('feedingAmount').value,
+                notes: document.getElementById('feedingNotes').value
+            };
+            
+            activities.unshift(activity);
+            saveActivities(); // <-- MODIFIKASI: Simpan
+            updateRecords();
+            updateSummary();
+            updateCharts();
+            e.target.reset();
+            setDefaultTime();
+            alert('✅ Data minum berhasil disimpan!');
+        }
+
+        function addSleep(e) {
+            e.preventDefault();
+            
+            const start = new Date(document.getElementById('sleepStart').value);
+            const end = new Date(document.getElementById('sleepEnd').value);
+            const duration = Math.round((end - start) / (1000 * 60));
+            
+            const activity = {
+                id: Date.now(),
+                type: 'sleep',
+                timeStart: document.getElementById('sleepStart').value,
+                timeEnd: document.getElementById('sleepEnd').value,
+                duration: duration,
+                quality: document.getElementById('sleepQuality').value,
+                notes: document.getElementById('sleepNotes').value
+            };
+            
+            activities.unshift(activity);
+            saveActivities(); // <-- MODIFIKASI: Simpan
+            updateRecords();
+            updateSummary();
+            updateCharts();
+            e.target.reset();
+            setDefaultTime();
+            alert('✅ Data tidur berhasil disimpan!');
+        }
+
+        function addDiaper(e) {
+            e.preventDefault();
+            
+            const activity = {
+                id: Date.now(),
+                type: 'diaper',
+                time: document.getElementById('diaperTime').value,
+                diaperType: document.getElementById('diaperType').value,
+                poopCondition: document.getElementById('poopCondition').value,
+                notes: document.getElementById('diaperNotes').value
+            };
+            
+            activities.unshift(activity);
+            saveActivities(); // <-- MODIFIKASI: Simpan
+            updateRecords();
+            updateSummary();
+            updateCharts();
+            e.target.reset();
+            setDefaultTime();
+            alert('✅ Data ganti popok berhasil disimpan!');
+        }
+
+        function addBath(e) {
+            e.preventDefault();
+            
+            const activity = {
+                id: Date.now(),
+                type: 'bath',
+                time: document.getElementById('bathTime').value,
+                bathType: document.getElementById('bathType').value,
+                reaction: document.getElementById('bathReaction').value,
+                notes: document.getElementById('bathNotes').value
+            };
+            
+            activities.unshift(activity);
+            saveActivities(); // <-- MODIFIKASI: Simpan
+            updateRecords();
+            updateCharts();
+            e.target.reset();
+            setDefaultTime();
+            alert('✅ Data mandi berhasil disimpan!');
+        }
+
+        function addNote(e) {
+            e.preventDefault();
+            
+            const activity = {
+                id: Date.now(),
+                type: 'note',
+                time: document.getElementById('noteTime').value,
+                category: document.getElementById('noteCategory').value,
+                content: document.getElementById('noteContent').value
+            };
+            
+            activities.unshift(activity);
+            saveActivities(); // <-- MODIFIKASI: Simpan
+            updateRecords();
+            e.target.reset();
+            setDefaultTime();
+            alert('✅ Catatan berhasil disimpan!');
+        }
+
+        function deleteActivity(id) {
+            // Gunakan konfirmasi kustom jika `confirm` tidak diizinkan
+            // Untuk sekarang, kita asumsikan `confirm` boleh.
+            if (confirm('Yakin ingin menghapus data ini?')) {
+                activities = activities.filter(a => a.id !== id);
+                saveActivities(); // <-- MODIFIKASI: Simpan
+                updateRecords();
+                updateSummary();
+                updateCharts();
+            }
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('id-ID', { 
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function updateRecords() {
+            const recordsList = document.getElementById('recordsList');
+            
+            if (activities.length === 0) {
+                recordsList.innerHTML = '<div class="empty-state">Belum ada catatan hari ini</div>';
+                return;
+            }
+            
+            let html = '';
+            activities.forEach(activity => {
+                let content = '';
+                let icon = '';
+                let title = '';
+                
+                switch(activity.type) {
+                    case 'feeding':
+                        icon = '🍼';
+                        title = 'Minum Susu';
+                        content = `
+                            <div class="record-info">
+                                <p><strong>Waktu:</strong> ${formatDateTime(activity.time)}</p>
+                                <p><strong>Jenis:</strong> ${activity.feedingType}</p>
+                                <p><strong>Jumlah:</strong> ${activity.amount} ml</p>
+                            </div>
+                            ${activity.notes ? `<p><strong>Catatan:</strong> ${activity.notes}</p>` : ''}
+                        `;
+                        break;
+                    case 'sleep':
+                        icon = '😴';
+                        title = 'Tidur';
+                        const hours = Math.floor(activity.duration / 60);
+                        const minutes = activity.duration % 60;
+                        content = `
+                            <div class="record-info">
+                                <p><strong>Mulai:</strong> ${formatDateTime(activity.timeStart)}</p>
+                                <p><strong>Bangun:</strong> ${formatDateTime(activity.timeEnd)}</p>
+                                <p><strong>Durasi:</strong> ${hours}j ${minutes}m</p>
+                                <p><strong>Kualitas:</strong> ${activity.quality}</p>
+                            </div>
+                            ${activity.notes ? `<p><strong>Catatan:</strong> ${activity.notes}</p>` : ''}
+                        `;
+                        break;
+                    case 'diaper':
+                        icon = '🩱';
+                        title = 'Ganti Popok';
+                        content = `
+                            <div class="record-info">
+                                <p><strong>Waktu:</strong> ${formatDateTime(activity.time)}</p>
+                                <p><strong>Jenis:</strong> ${activity.diaperType}</p>
+                                <p><strong>Kondisi BAB:</strong> ${activity.poopCondition}</p>
+                            </div>
+                            ${activity.notes ? `<p><strong>Catatan:</strong> ${activity.notes}</p>` : ''}
+                        `;
+                        break;
+                    case 'bath':
+                        icon = '🛁';
+                        title = 'Mandi';
+                        content = `
+                            <div class="record-info">
+                                <p><strong>Waktu:</strong> ${formatDateTime(activity.time)}</p>
+                                <p><strong>Jenis:</strong> ${activity.bathType}</p>
+                                <p><strong>Reaksi:</strong> ${activity.reaction}</p>
+                            </div>
+                            ${activity.notes ? `<p><strong>Catatan:</strong> ${activity.notes}</p>` : ''}
+                        `;
+                        break;
+                    case 'note':
+                        icon = '📝';
+                        title = 'Catatan';
+                        content = `
+                            <div class="record-info">
+                                <p><strong>Waktu:</strong> ${formatDateTime(activity.time)}</p>
+                                <p><strong>Kategori:</strong> ${activity.category}</p>
+                            </div>
+                            <p><strong>Isi:</strong> ${activity.content}</p>
+                        `;
+                        break;
+                }
+                
+                html += `
+                    <div class="record-card">
+                        <button class="btn-delete" onclick="deleteActivity(${activity.id})">Hapus</button>
+                        <h3>${icon} ${title}</h3>
+                        ${content}
+                    </div>
+                `;
+            });
+            
+            recordsList.innerHTML = html;
+        }
+
+        function updateSummary() {
+            const today = new Date().toDateString();
+            const todayActivities = activities.filter(a => {
+                const activityDate = new Date(a.time || a.timeStart).toDateString();
+                return activityDate === today;
+            });
+            
+            const feedingCount = todayActivities.filter(a => a.type === 'feeding').length;
+            const totalMl = todayActivities
+                .filter(a => a.type === 'feeding')
+                .reduce((sum, a) => sum + parseInt(a.amount || 0), 0);
+            const sleepCount = todayActivities.filter(a => a.type === 'sleep').length;
+            const diaperCount = todayActivities.filter(a => a.type === 'diaper').length;
+            
+            document.getElementById('totalFeeding').textContent = feedingCount;
+            document.getElementById('totalMl').textContent = totalMl + 'ml';
+            document.getElementById('totalSleep').textContent = sleepCount;
+            document.getElementById('totalDiaper').textContent = diaperCount;
+        }
+
+        function getDatesInRange(days) {
+            const dates = [];
+            const today = new Date();
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            return dates;
+        }
+
+        function updateCharts() {
+            const period = parseInt(document.getElementById('chartPeriod').value);
+            const dates = getDatesInRange(period);
+            
+            const feedingData = dates.map(date => {
+                const dayActivities = activities.filter(a => {
+                    if (a.type !== 'feeding') return false;
+                    const activityDate = new Date(a.time).toISOString().split('T')[0];
+                    return activityDate === date;
+                });
+                return dayActivities.reduce((sum, a) => sum + parseInt(a.amount || 0), 0);
+            });
+
+            const sleepData = dates.map(date => {
+                const dayActivities = activities.filter(a => {
+                    if (a.type !== 'sleep') return false;
+                    const activityDate = new Date(a.timeStart).toISOString().split('T')[0];
+                    return activityDate === date;
+                });
+                const totalMinutes = dayActivities.reduce((sum, a) => sum + (a.duration || 0), 0);
+                return (totalMinutes / 60).toFixed(1); 
+            });
+
+            const diaperData = dates.map(date => {
+                return activities.filter(a => {
+                    if (a.type !== 'diaper') return false;
+                    const activityDate = new Date(a.time).toISOString().split('T')[0];
+                    return activityDate === date;
+                }).length;
+            });
+
+            const labels = dates.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+            });
+
+            if (feedingChart) feedingChart.destroy();
+            const ctxFeeding = document.getElementById('feedingChart').getContext('2d');
+            feedingChart = new Chart(ctxFeeding, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Asupan (ml)',
+                        data: feedingData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Jumlah (ml)' } } }
+                }
+            });
+
+            if (sleepChart) sleepChart.destroy();
+            const ctxSleep = document.getElementById('sleepChart').getContext('2d');
+            sleepChart = new Chart(ctxSleep, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Tidur (jam)',
+                        data: sleepData,
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.2)',
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Total Jam' } } }
+                }
+            });
+
+            if (diaperChart) diaperChart.destroy();
+            const ctxDiaper = document.getElementById('diaperChart').getContext('2d');
+            diaperChart = new Chart(ctxDiaper, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Frekuensi Ganti Popok',
+                        data: diaperData,
+                        borderColor: '#ff4757',
+                        backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ff4757'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Jumlah Kali' } } }
+                }
+            });
+        }
+        
+        // MODIFIKASI 3: Panggil fungsi saat aplikasi dimuat
+        window.onload = () => {
+            setDefaultTime();
+            
+            // Muat semua data yang ada saat membuka aplikasi
+            updateRecords();
+            updateSummary();
+            updateCharts();
+            
+            // MODIFIKASI 4: Daftarkan Service Worker
+            /*
+            KOMENTAR: Pendaftaran Service Worker dinonaktifkan sementara.
+            Lingkungan preview (yang menggunakan 'blob:' URL) tidak mendukung
+            pendaftaran service worker karena alasan keamanan.
+            Fitur PWA lain seperti "Add to Home Screen" (via manifest.json)
+            dan penyimpanan data (via localStorage) akan tetap berfungsi.
+            Saat Anda men-deploy ini ke server web (HTTPS) sungguhan, 
+            Anda dapat mengaktifkan kembali kode di bawah ini.
+            */
+            // if ('serviceWorker' in navigator) {
+            //     navigator.serviceWorker.register('sw.js') // Anda bisa juga mencoba '/sw.js' saat di server
+            //         .then(registration => {
+            //             console.log('Service Worker berhasil didaftarkan:', registration);
+            //         })
+            //         .catch(err => {
+            //             console.error('Pendaftaran Service Worker gagal:', err);
+            //         });
+            // }
+        };
+
+    </script>
+</body>
+</html>
+
