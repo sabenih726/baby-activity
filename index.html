@@ -35,6 +35,7 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative; /* Penting untuk notifikasi */
         }
 
         h1 {
@@ -237,6 +238,30 @@
             margin-right: 5px;
         }
 
+        /* NOTIFIKASI KUSTOM BARU */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50; /* Hijau */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateY(100%);
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        #notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -249,6 +274,16 @@
             .tab-btn {
                 font-size: 0.8em;
                 padding: 10px 15px;
+            }
+
+            /* Notifikasi di ponsel: di tengah bawah */
+            #notification {
+                left: 50%;
+                transform: translateX(-50%) translateY(100%);
+                bottom: 10px;
+            }
+            #notification.show {
+                transform: translateX(-50%) translateY(0);
             }
         }
     </style>
@@ -469,6 +504,11 @@
             </div>
         </div>
     </div>
+    
+    <!-- Elemen Notifikasi Baru -->
+    <div id="notification">
+        <span style="margin-right: 8px;">✅</span><span id="notificationMessage">Catatan berhasil disimpan!</span>
+    </div>
 
     <!-- Hapus 1 dari 2 script Chart.js yang duplikat -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -482,6 +522,21 @@
         function saveActivities() {
             localStorage.setItem('babyActivities', JSON.stringify(activities));
         }
+        
+        // FUNGSI BARU: Menampilkan notifikasi kustom
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notificationMessage');
+            
+            messageElement.textContent = message;
+            notification.classList.add('show');
+            
+            // Sembunyikan notifikasi setelah 3 detik
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
 
         function setDefaultTime() {
             const now = new Date();
@@ -531,13 +586,15 @@
             };
             
             activities.unshift(activity);
-            saveActivities(); // <-- MODIFIKASI: Simpan
+            saveActivities(); 
             updateRecords();
             updateSummary();
             updateCharts();
             e.target.reset();
             setDefaultTime();
-            alert('✅ Data minum berhasil disimpan!');
+            
+            // MODIFIKASI: Tampilkan notifikasi, BUKAN alihkan tab
+            showNotification('Data Minum berhasil disimpan!');
         }
 
         function addSleep(e) {
@@ -558,13 +615,15 @@
             };
             
             activities.unshift(activity);
-            saveActivities(); // <-- MODIFIKASI: Simpan
+            saveActivities();
             updateRecords();
             updateSummary();
             updateCharts();
             e.target.reset();
             setDefaultTime();
-            alert('✅ Data tidur berhasil disimpan!');
+            
+            // MODIFIKASI: Tampilkan notifikasi, BUKAN alihkan tab
+            showNotification('Data Tidur berhasil disimpan!');
         }
 
         function addDiaper(e) {
@@ -580,13 +639,15 @@
             };
             
             activities.unshift(activity);
-            saveActivities(); // <-- MODIFIKASI: Simpan
+            saveActivities();
             updateRecords();
             updateSummary();
             updateCharts();
             e.target.reset();
             setDefaultTime();
-            alert('✅ Data ganti popok berhasil disimpan!');
+
+            // MODIFIKASI: Tampilkan notifikasi, BUKAN alihkan tab
+            showNotification('Data Ganti Popok berhasil disimpan!');
         }
 
         function addBath(e) {
@@ -602,12 +663,14 @@
             };
             
             activities.unshift(activity);
-            saveActivities(); // <-- MODIFIKASI: Simpan
+            saveActivities();
             updateRecords();
             updateCharts();
             e.target.reset();
             setDefaultTime();
-            alert('✅ Data mandi berhasil disimpan!');
+            
+            // MODIFIKASI: Tampilkan notifikasi, BUKAN alihkan tab
+            showNotification('Data Mandi berhasil disimpan!');
         }
 
         function addNote(e) {
@@ -622,11 +685,13 @@
             };
             
             activities.unshift(activity);
-            saveActivities(); // <-- MODIFIKASI: Simpan
+            saveActivities();
             updateRecords();
             e.target.reset();
             setDefaultTime();
-            alert('✅ Catatan berhasil disimpan!');
+            
+            // MODIFIKASI: Tampilkan notifikasi, BUKAN alihkan tab
+            showNotification('Catatan Umum berhasil disimpan!');
         }
 
         function deleteActivity(id) {
@@ -634,10 +699,11 @@
             // Untuk sekarang, kita asumsikan `confirm` boleh.
             if (confirm('Yakin ingin menghapus data ini?')) {
                 activities = activities.filter(a => a.id !== id);
-                saveActivities(); // <-- MODIFIKASI: Simpan
+                saveActivities(); 
                 updateRecords();
                 updateSummary();
                 updateCharts();
+                showNotification('Data berhasil dihapus!');
             }
         }
 
@@ -793,7 +859,7 @@
                     const activityDate = new Date(a.timeStart).toISOString().split('T')[0];
                     return activityDate === date;
                 });
-                const totalMinutes = dayActivities.reduce((sum, a => sum + (a.duration || 0)), 0);
+                const totalMinutes = dayActivities.reduce((sum, a) => sum + (a.duration || 0), 0);
                 return (totalMinutes / 60).toFixed(1); 
             });
 
