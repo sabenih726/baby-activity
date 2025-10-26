@@ -255,11 +255,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>Baby Activity Log</h1>
-        <p class="subtitle">Record every important moment of your little one</p>
+        <h1>👶 Pencatatan Aktivitas Bayi</h1>
+        <p class="subtitle">Catat setiap momen penting si kecil</p>
 
         <div class="summary" id="summary">
-            <h2>Today's Summary</h2>
+            <h2>📊 Ringkasan Hari Ini</h2>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="number" id="totalFeeding">0</div>
@@ -793,7 +793,7 @@
                     const activityDate = new Date(a.timeStart).toISOString().split('T')[0];
                     return activityDate === date;
                 });
-                const totalMinutes = dayActivities.reduce((sum, a) => sum + (a.duration || 0), 0);
+                const totalMinutes = dayActivities.reduce((sum, a => sum + (a.duration || 0)), 0);
                 return (totalMinutes / 60).toFixed(1); 
             });
 
@@ -894,27 +894,19 @@
             updateCharts();
             
             // MODIFIKASI 4: Daftarkan Service Worker
-            /*
-            KOMENTAR: Pendaftaran Service Worker dinonaktifkan sementara.
-            Lingkungan preview (yang menggunakan 'blob:' URL) tidak mendukung
-            pendaftaran service worker karena alasan keamanan.
-            Fitur PWA lain seperti "Add to Home Screen" (via manifest.json)
-            dan penyimpanan data (via localStorage) akan tetap berfungsi.
-            Saat Anda men-deploy ini ke server web (HTTPS) sungguhan, 
-            Anda dapat mengaktifkan kembali kode di bawah ini.
-            */
-            // if ('serviceWorker' in navigator) {
-            //     navigator.serviceWorker.register('sw.js') // Anda bisa juga mencoba '/sw.js' saat di server
-            //         .then(registration => {
-            //             console.log('Service Worker berhasil didaftarkan:', registration);
-            //         })
-            //         .catch(err => {
-            //             console.error('Pendaftaran Service Worker gagal:', err);
-            //         });
-            // }
+            // Kode ini sekarang TIDAK di dalam komentar dan akan dieksekusi!
+            if ('serviceWorker' in navigator) {
+                // Diperbarui untuk menggunakan './sw.js' yang lebih aman untuk deployment
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker berhasil didaftarkan. PWA siap untuk offline/install:', registration);
+                    })
+                    .catch(err => {
+                        console.error('Pendaftaran Service Worker gagal:', err);
+                    });
+            }
         };
 
     </script>
 </body>
 </html>
-
